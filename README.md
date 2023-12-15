@@ -1,0 +1,3 @@
+- Get Distribution
+- get data from: gas_sorption.pdf with: https://apps.automeris.io/wpd/
+- simulate with: https://openpnm.org/index.html
