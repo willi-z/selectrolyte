@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 xs = [] # pore size
 ys = [] # comulative volume
-with open('./data/pore_distr_data.csv', 'r') as csvfile:
+with open('../data/pore_distr_data.csv', 'r') as csvfile:
     reader = csv.reader(csvfile,quoting=csv.QUOTE_MINIMAL)
     header = reader.__next__()
     print(header)
@@ -63,6 +63,20 @@ net.add_model(propname='throat.diameter',
 )
 
 
+diameters = net["pore.diameter"]
+connections = net["throat.conns"]
+drop = []
+for i in range(len(connections)):
+    connection = connections[i]
+    d0 = diameters[connection[0]]
+    d1 = diameters[connection[1]]
+
+    if (d0 + d1)/2 < spacing *1.1:
+        drop.append(i)
+
+op.topotools.trim(network=net, throats=drop)
+print
+
 net.add_model(propname='pore.volume',
              model=op.models.geometry.pore_volume.sphere)
 net.add_model(propname='throat.length',
@@ -86,6 +100,9 @@ net.add_model(
     model=op.models.geometry.diffusive_size_factors.spheres_and_cylinders
 )
 net.regenerate_models()
+
+A = (shape[1] * shape[2])*(spacing**2)
+L = shape[0]*spacing
 
 
 Vol_void = np.sum(net['pore.volume'])+np.sum(net['throat.volume'])

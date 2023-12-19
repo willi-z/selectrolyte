@@ -1,5 +1,5 @@
 import plotly.graph_objects as go
-from network import net
+from networks.randnet import net
 import numpy as np
 
 fig = go.Figure()
