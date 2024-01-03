@@ -2,6 +2,7 @@ from .ipore import IPoreGenerator, PoreNetworkConfig
 from scipy.spatial import KDTree
 import numpy as np
 from .helpers import iso_2_coord
+from .voxel import VoxelGrid
 
 
 class RandomEquidistantSpacePoreGenerator(IPoreGenerator):
@@ -9,10 +10,16 @@ class RandomEquidistantSpacePoreGenerator(IPoreGenerator):
         pass
 
     def generate(self, diameters: list[list[float]], bounds: tuple[float, float, float]) -> PoreNetworkConfig:
-        drops = []
-        coords = [iso_2_coord(np.random.rand(3), bounds)]
         diameters[::-1].sort()
         Dmax = diameters[0]
+        Dmin = diameters[-1]
+        grid = VoxelGrid(bounds, Dmin)
+
+        drops = []
+        coords = [iso_2_coord(np.random.rand(3), bounds)]
+        
+        grid.remove_filled_voxels(coords[0], diameters[0])
+        
 
         for i in range(1, len(diameters)):
             tree = KDTree(
@@ -40,5 +47,6 @@ class RandomEquidistantSpacePoreGenerator(IPoreGenerator):
             else:
                 drops.append(i)
 
+        print("droped dias (larger index = smaller):", drops)
         Dpores = np.delete(diameters, drops)
         return PoreNetworkConfig(coords=coords, diameters=Dpores)

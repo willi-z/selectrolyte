@@ -1,4 +1,18 @@
-from networks.network import op, net, A, L, porosity
+from networks.generators.config import NetworkConfig
+from networks.helpers import model_from_network
+from pathlib import Path
+import json
+import openpnm as op
+import numpy as np
+
+with (Path.cwd() / "data/networks/random_0.54.json").open("r") as fp:
+    content = json.load(fp)
+
+conf = NetworkConfig(**content)
+model = model_from_network(conf)
+net = model.network
+L = model.bounds[0]
+A = model.bounds[1] * model.bounds[2]
 
 # phase
 # liquid = op.phase.Water(network=net)
@@ -14,7 +28,7 @@ electrolyte.regenerate_models()
 
 fd = op.algorithms.FickianDiffusion(network=net, phase=electrolyte)
 
-import numpy as np
+
 if not np.isfinite(fd.A.data).all():
     print(fd.A.data)
     print("A")
@@ -37,8 +51,9 @@ D_eff = rate_inlet * L / (A * (C_in - C_out))
 print("The effective  diffusivity is: {0:.6E} m/s^2".format(D_eff))
 # 
 exact = 0.000005321864708362311
-print("relative error: ", abs(D_eff - exact) / exact)
+print("abs. error", D_eff - exact)
+print("rel. error: ", abs(D_eff - exact) / exact)
 D_AB = electrolyte['pore.diffusivity'][0]
-tau = porosity * D_AB / D_eff
+tau = model.porosity * D_AB / D_eff
 print('The tortuosity is:', "{0:.6E}".format(tau))
 

@@ -11,7 +11,7 @@ num_pores = 100
 porosity = 0.54
 
 
-"""
+# """"
 conf = generate_network(
     CSVFileDiameterDistribution('./data/pore_distr_data.csv'),
     num_pores,
@@ -32,6 +32,8 @@ conf = update_network_connections(
 )
 # """
 
+print("num. pores:", len(conf.pores.diameters))
+print("num. conncetions: ",len(conf.conns.conns))
 with (Path.cwd() / (f"data/networks/random_{porosity}.json")).open("w+") as fp:
     json.dump(conf.model_dump(), fp)
 
