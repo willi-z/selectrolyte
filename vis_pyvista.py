@@ -1,7 +1,10 @@
 import pyvista
-from networks.network import net, L
 import matplotlib
 import numpy as np
+from pathlib import Path
+import json
+from networks.generators.config import NetworkConfig
+from networks.helpers import model_from_network
 
 
 
@@ -27,6 +30,15 @@ boundary = pyvista.MultipleLines(points=[
 
 pl = pyvista.Plotter()
 pl.add_mesh(boundary)
+
+with (Path.cwd() / "data/networks/random_0.54.json").open("r") as fp:
+    content = json.load(fp)
+
+conf = NetworkConfig(**content)
+model = model_from_network(conf)
+net = model.network
+L = model.bounds[0]
+
 DSpheres = net["pore.diameter"]
 coords = net["pore.coords"]
 

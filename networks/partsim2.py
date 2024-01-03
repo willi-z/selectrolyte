@@ -1,5 +1,6 @@
 import open3d as o3d
 import numpy as np
+import time
 import csv
 import numpy as np
 from numpy import linalg as LA
@@ -13,15 +14,14 @@ https://stackoverflow.com/questions/65774814/adding-new-points-to-point-cloud-in
 """
 
 # Global settings.
-dt = 1e-6 # to add new points each dt secs.
+dt = 1e-3 # to add new points each dt secs.
 t_total = 10 # total time to run this script.
 n_new = 10 # number of points that will be added each iteration.
 num_pores = 5
 porosity = 0.4
 eps = 0.05
 colli_damp = 0.2
-density_target = 1e-5
-p_multiplier = 1e-4
+spring_constant = 1e4
 
 xs = [] # pore size
 ys = [] # comulative volume
@@ -71,7 +71,16 @@ for i in range(len(Dpores)):
     coords_predicted.append(coords[i].copy())
 
 velocities = np.zeros((num_pores, 3), np.float32)
-densities = np.zeros((num_pores,2), np.float32)
+masses = np.zeros((num_pores), np.float32)
+forces = np.zeros((num_pores, 3), np.float32)
+
+def calc_mass(idx):
+    volume = np.pi / 6 * Dpores[idx]
+    masses[idx] =  volume
+
+for i in range(num_pores):
+    calc_mass(i)
+
 
 def resolve_collisons(idx):
     coord  = coords[idx]
@@ -83,121 +92,45 @@ def resolve_collisons(idx):
             coord[i] = box_length
             velocities[idx][i] *= -1 * colli_damp
 
-def spiky_kernel_pow2(dist: float, radius: float)->float:
-    if dist > radius:
-        return 0
-    scale = 15 / (2 * np.pi * np.power(radius, 5))
-    v = radius - dist
-    return v * v * scale
 
-def spiky_kernel_pow3(dist: float, radius: float)->float:
-    if dist > radius:
-        return 0
-    scale = 15 / (2 * np.pi * np.power(radius, 6))
-    v = radius - dist
-    return v * v * v * scale
-
-def spiky_kernel_pow2_deriv(dist: float, radius: float)->float:
-    if dist > radius:
-        return 0
-    scale = 15 / (np.pi * np.power(radius, 5))
-    v = radius - dist
-    return -v * scale
-
-def spiky_kernel_pow3_deriv(dist: float, radius: float)->float:
-    if dist > radius:
-        return 0
-    scale = 45 / (np.pi * np.power(radius, 6))
-    v = radius - dist
-    return -v * v * scale
-
-
-def density_kernel(dist: float, radius: float):
-    return spiky_kernel_pow2(dist, radius)
-
-def near_density_kernel(dist: float, radius: float):
-    return spiky_kernel_pow3(dist, radius)
-
-def density_kernel_deriv(dist: float, radius: float):
-    return spiky_kernel_pow2_deriv(dist, radius)
-
-def near_density_kernel_deriv(dist: float, radius: float):
-    return spiky_kernel_pow3_deriv(dist, radius)
-
-def calc_mass(idx):
-    volume = np.pi / 6 * Dpores[idx]
-    return volume * density_target
-
-def calc_density(tree, idx):
-    global densities
-    density = 0.0
-    near_density = 0.0
-    smooth_radius = box_length # Dmax # Dpores[idx]
-    pos = coords_predicted[idx]
-    neighbours = tree.query_ball_point(pos, smooth_radius)
-    for nidx in neighbours:
-        npos = coords_predicted[nidx]
-        mass = calc_mass(nidx)
-        offset = npos - pos
-        dist = LA.norm(offset)
-        density += density_kernel(dist, smooth_radius) * mass
-        near_density += near_density_kernel(dist, smooth_radius) * mass
-    densities[idx][0], densities[idx][1] = density, near_density
-
-def pressure_from_density(density: float):
-    density_err = density - density_target
-    pressure = density_err * p_multiplier
-    return pressure
-
-def near_pressure_from_density(near_density: float):
-    pressure = near_density * p_multiplier
-    return pressure
-
-def calc_pressure_force(tree, idx):
-    global densities, velocities
-    pForce = np.zeros(3)
-    density, near_density = tuple(densities[idx])
-    pressure, near_pressure = pressure_from_density(density), near_pressure_from_density(near_density)
-    smooth_radius = box_length# Dmax # Dpores[idx]
+def calc_forces(tree, idx):
+    force = np.zeros(3, dtype=np.float32)
+    mass = masses[idx]
+    Dpore = Dpores[i]
+    smooth_radius = Dpores[idx] # Dpores[idx]
     pos = coords_predicted[idx]
     neighbours = tree.query_ball_point(pos, smooth_radius)
     for nidx in neighbours:
         if nidx == idx:
             continue
-
+        npos = coords_predicted[nidx]
+        nmass = masses[nidx]
+        offset = npos - pos
+        dist = LA.norm(offset)
         offset = coords_predicted[nidx] - pos
         dist = LA.norm(offset)
 
         direction = np.random.rand(3)
-        if dist == 0.0:
+        if dist == 0:
             direction = direction / LA.norm(direction)
         else:
             direction = offset / dist
-            
-        density_neighbour, near_density_neighbour = densities[nidx]
-        pressure_neighbour, near_pressure_neighbour = pressure_from_density(density_neighbour), near_pressure_from_density(near_density_neighbour)
+        force_in_between = direction * (dist - (Dpore+ Dpores[nidx])*4)* spring_constant * (mass * nmass)/ (dist**2)
+        force += -1*force_in_between
+        forces[nidx] += force_in_between
 
-        pressure_share = (pressure + pressure_neighbour) / 2
-        near_pressure_share = (near_pressure + near_pressure_neighbour) / 2
+    forces[idx] += force
 
-        pf1 = direction * density_kernel_deriv(dist, smooth_radius) * pressure_share / density_neighbour
-        pf2 = direction * near_density_kernel_deriv(dist, smooth_radius) * near_pressure_share / near_density_neighbour
-
-        pForce += pf1
-        pForce += pf2
-    accelaration = pForce / density
-    velocities[idx] += accelaration * dt
 
 def update_coords(coords):
     tree = KDTree(coords_predicted)
+    forces = np.zeros((num_pores, 3), dtype=np.float32)
     for i in range(num_pores):
         # velocities[i] += np.array([0.0,-1.0,0.0]) * (0.1*box_length) * dt
-        calc_density(tree, i)
+        calc_forces(tree, i)
 
     for i in range(num_pores):
-        calc_pressure_force(tree, i)
-
-    for i in range(num_pores):
+        velocities[i] +=  forces[i] / masses[i] * dt
         coords[i] += velocities[i] *dt
         resolve_collisons(i)
         coords_predicted[i] = coords[i] + velocities[i] / 120.0
