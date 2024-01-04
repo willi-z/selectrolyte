@@ -9,8 +9,8 @@ class CSVFileDiameterDistribution(IDiameterDistribution):
         self.ys = []
         with open(path, 'r') as csvfile:
             reader = csv.reader(csvfile,quoting=csv.QUOTE_MINIMAL)
-            header = reader.__next__()
-            print(header)
+            _header = reader.__next__()
+            # print(header)
             for data in reader:
                 self.xs.append(np.float64(data[0]))
                 self.ys.append(np.float64(data[1]))
@@ -21,8 +21,6 @@ class CSVFileDiameterDistribution(IDiameterDistribution):
 
     
     def generate_n_diameters(self,  num: int):
-        np.random.seed(0)
-
         seeds = np.random.rand(num)
         Dpores = np.interp(seeds, self.ys, self.xs)
         return Dpores

@@ -1,0 +1,2 @@
+def study(path, ):
+    pass

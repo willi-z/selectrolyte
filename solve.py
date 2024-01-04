@@ -5,7 +5,7 @@ import json
 import openpnm as op
 import numpy as np
 
-with (Path.cwd() / "data/networks/random_0.54.json").open("r") as fp:
+with (Path.cwd() / "data/networks/rand_0.54.json").open("r") as fp:
     content = json.load(fp)
 
 conf = NetworkConfig(**content)

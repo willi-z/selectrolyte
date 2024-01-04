@@ -43,7 +43,7 @@ def calc_porosity(
     return Vol_void / Vol_bulk
 
 
-def interval_method(func, bounds: tuple, eps) -> float:
+def interval_method(func, bounds: tuple, eps) -> tuple[float, float]:
     x0 = bounds[0]
     x1 = bounds[1]
     xm = (x0 + x1)/2
@@ -56,7 +56,8 @@ def interval_method(func, bounds: tuple, eps) -> float:
             (abs(fm), xm),
             (abs(f1), x1),
         ]
-        return sorted(vals, key= lambda pair: pair[0])[0][1]
+        best_val = sorted(vals, key= lambda pair: pair[0])[0]
+        return (best_val[1], best_val[0]) # (x, f)
     if fm * f0 < 0: # different sign
         return interval_method(func, (x0, xm), eps)
     else:

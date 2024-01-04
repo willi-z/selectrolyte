@@ -14,13 +14,15 @@ def generate_network(
     diameter_generator: IDiameterDistribution,
     num_pores: int,
     porosity: float, 
+    vol_ratio_throats_spheres: float,
     pore_generator: IPoreGenerator,
     conns_generator: IConnsGenerator
     ) -> NetworkConfig:
+    assert 0 < vol_ratio_throats_spheres < 1.0
     pore_diameters = diameter_generator.generate_n_diameters(num_pores)
     pore_vol = get_pore_vol(pore_diameters)
-
-    box_vol = pore_vol / porosity
+    throat_vol = pore_vol * vol_ratio_throats_spheres
+    box_vol = (pore_vol + throat_vol) / porosity
     box_length = np.power(box_vol,1/3.)
     bounds = (box_length, box_length, box_length)
     pore_config = pore_generator.generate(pore_diameters, bounds)

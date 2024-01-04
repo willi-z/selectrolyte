@@ -1,7 +1,7 @@
 from networks.helpers import generate_network, update_network_connections  # noqa
 from networks.generators.config import NetworkConfig  # noqa
 from networks.distribution.distribution_file import CSVFileDiameterDistribution  # noqa
-from networks.generators.pores.pore_ed import RandomEquidistantSpacePoreGenerator  # noqa
+from networks.generators.pores import RandomEquidistantSpacePoreGenerator, RandomPoreGenerator  # noqa
 from networks.generators.conns.conns_nearest import NearestConnsGenerator
 import json
 from pathlib import Path
@@ -9,21 +9,25 @@ from pathlib import Path
 
 num_pores = 100
 porosity = 0.54
+ratio_throat_pores = 0.02
 
+distrib_file = './data/pore_distr_data.csv'
+config_file = f"data/networks/rand_{porosity}.json"
 
 # """"
 conf = generate_network(
-    CSVFileDiameterDistribution('./data/pore_distr_data.csv'),
+    CSVFileDiameterDistribution(distrib_file),
     num_pores,
     porosity,
-    RandomEquidistantSpacePoreGenerator(),
+    ratio_throat_pores,
+    RandomPoreGenerator(),
     NearestConnsGenerator()
 )
 
 
 """
 
-with (Path.cwd() / f"data/networks/random_{porosity}.json").open("r") as fp:
+with (Path.cwd() / config_file).open("r") as fp:
     content = json.load(fp)
 
 conf = update_network_connections(
@@ -34,7 +38,7 @@ conf = update_network_connections(
 
 print("num. pores:", len(conf.pores.diameters))
 print("num. conncetions: ",len(conf.conns.conns))
-with (Path.cwd() / (f"data/networks/random_{porosity}.json")).open("w+") as fp:
+with (Path.cwd() / config_file).open("w+") as fp:
     json.dump(conf.model_dump(), fp)
 
 """
