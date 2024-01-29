@@ -80,7 +80,7 @@ def model_from_network(
     # print("left: ", np.where(net['pore.left'])[0])
     # print("right: ", np.where(net['pore.right'])[0])
 
-    Vol_void = np.sum(net['pore.volume'])+np.sum(net['throat.volume'])
+    Vol_void = np.sum(net['pore.volume'])+np.sum(net['throat.volume']) - conf.pores.extra_volume
     Vol_bulk = conf.bounds[0] * conf.bounds[1] * conf.bounds[2]
     porosity = Vol_void / Vol_bulk
     print(f'Porosity is: {porosity * 100:.2f}% (goal was: {conf.porosity* 100:.2f}%)')

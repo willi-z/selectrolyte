@@ -8,9 +8,9 @@ import openpnm as op
 import json
 from pathlib import Path
 
-num_pore = 100
+num_pore = 1000
 porosity = 0.54
-ratio_throat_pores = np.arange(0.01, 0.5, 0.01)
+ratio_throat_pores = np.arange(0.01, 0.11, 0.01)
 max_tries = 10
 
 distrib_file = './data/pore_distr_data.csv'

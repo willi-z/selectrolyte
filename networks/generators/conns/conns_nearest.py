@@ -76,4 +76,4 @@ class NearestConnsGenerator(IConnsGenerator):
 
         scale, poro = interval_method(porosty_optimizer, (0.0, 1.0), 1e-5)
         print("arch. porosity:",poro+porosity, "(vs.", porosity , ")", "by scaling with:", scale)
-        return ConnsNetworkConfig(conns= conns, diameters = diameters * scale)
+        return ConnsNetworkConfig(conns= conns, diameters = diameters * scale, )
