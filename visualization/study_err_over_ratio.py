@@ -49,7 +49,7 @@ Deff_exact = 0.000005321864708362311
 plt.rcParams.update(plot_config)
 fig,ax = plt.subplots(figsize=(4,3))
 
-ratio = 0.03
+num_pore = 1000
 
 # process data
 with (Path.cwd() / "data/studies/err_over_ratio.json").open("r") as fp:
@@ -57,14 +57,18 @@ with (Path.cwd() / "data/studies/err_over_ratio.json").open("r") as fp:
 
 xs = []
 ys = []
-for num_pore, ratios in data.items():
-    xs.append(int(num_pore))
-    err = np.array(ratios[str(ratio)])
+
+ratios = data[str(num_pore)]
+for ratio, err in ratios.items():
+    print(float(ratio))
+    xs.append(ratio)
+    err = np.array(err)
     rel_err = err / Deff_exact * 100 
-    ys.append(rel_err)
+    ys.append(rel_err[0])
 
 
-ax.boxplot(x=ys, positions=xs, widths=20)
+# ax.boxplot(x=ys, positions=xs, widths=20)
+ax.plot(xs, ys)
 
 ax.set_xlabel(r"$n_p \; \left[ \; \right]$")
 ax.set_ylabel(r"$rel. err \; \left[ \% \right]$")
@@ -76,5 +80,5 @@ ax.legend(loc='lower right',
 fig.tight_layout(pad=0)
 
 outputDir = Path().cwd() / "results"
-plt.savefig(outputDir / (f"study_err_over_poresizes_{ratio}" + '.pdf'))
+plt.savefig(outputDir / (f"study_err_over_ratio_{num_pore}" + '.pdf'))
 # plt.show()

@@ -8,7 +8,8 @@ import openpnm as op
 import json
 from pathlib import Path
 
-num_pores = np.arange(100, 200, 2)
+np.random.seed(0)
+num_pores = [100]
 porosity = 0.54
 ratio_throat_pores = 0.02
 max_tries = 10
@@ -50,6 +51,9 @@ def study_best_ratio(num_pore):
         num_tries = 0
         success = False
         while num_tries < max_tries and not success:
+
+            np.random.seed(0) # <---
+
             conf = generate_network(
                 CSVFileDiameterDistribution(distrib_file),
                 num_pore,

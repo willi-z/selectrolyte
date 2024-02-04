@@ -18,15 +18,29 @@ class NearestConnsGenerator(IConnsGenerator):
         self.num_neighbours = num_neighbours
         self.dfunc = dfunc
 
-    def generate(self, box_vol:float, porosity: float, pores: PoreNetworkConfig) -> ConnsNetworkConfig:
+    def generate(self, bounds:tuple[float, float, float], porosity: float, pores: PoreNetworkConfig) -> ConnsNetworkConfig:
         tree = KDTree(
                 pores.coords
         )
         tubes = {}
         Dmax = np.max(pores.diameters)
-        vol_pores = get_pore_vol(np.array(pores.diameters))
+        inner_pores = np.ones(len(pores.coords))
+        for i in range(len(pores.coords)):
+            pos = pores.coords[i]
+            if np.any(np.less(pos, np.zeros(3))):
+                inner_pores[i] = 0
+            elif np.any(np.greater(pos, bounds)):
+                inner_pores[i] = 0
+
+        vol_pores = get_pore_vol(np.array(pores.diameters) * inner_pores)
+        # print(vol_pores)
+        box_vol = bounds[0] * bounds[1] * bounds[2]
         vol_empty = box_vol * porosity
         vol_throats = vol_empty - vol_pores
+        #print("[NearestConns] vol_empty", vol_empty)
+        #print("[NearestConns] vol_pores", vol_pores)
+        #print("[NearestConns] vol_throats:", vol_throats)
+        # assert False
         assert vol_throats > 0
 
         for i in range(len(pores.coords)):
@@ -71,8 +85,20 @@ class NearestConnsGenerator(IConnsGenerator):
 
         diameters = np.array(diameters)
 
+        throat_impact = np.ones(len(conns))
+        for i in range(len(throat_impact)):
+            conn = conns[i]
+            if inner_pores[conn[0]] == 0.0:
+                throat_impact[i] -= 0.5
+            if inner_pores[conn[1]] == 0.0:
+                throat_impact[i] -= 0.5
+
         def porosty_optimizer(scale):
-            return calc_porosity(pores.coords, pores.diameters, conns, diameters * scale, box_vol)-porosity
+            return calc_porosity(
+                pores.coords, pores.diameters, 
+                conns, diameters * scale, 
+                box_vol,
+                inner_pores, throat_impact) - porosity
 
         scale, poro = interval_method(porosty_optimizer, (0.0, 1.0), 1e-5)
         print("arch. porosity:",poro+porosity, "(vs.", porosity , ")", "by scaling with:", scale)

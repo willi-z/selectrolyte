@@ -8,9 +8,10 @@ import openpnm as op
 import json
 from pathlib import Path
 
-num_pore = 1000
+
+num_pores = [400, 500, 600, 700, 800]
 porosity = 0.54
-ratio_throat_pores = np.arange(0.01, 0.11, 0.01)
+ratio_throat_pores = np.arange(0.02, 0.12, 0.02)
 max_tries = 10
 
 distrib_file = './data/pore_distr_data.csv'
@@ -20,7 +21,7 @@ del phys['throat.entry_pressure']
 
 
 
-def study_best_ratio(ratio):
+def study_best_ratio(ratio, num_pore):
     Deff_exact = 0.000005321864708362311
     def ratio_optimizer(ratio):
         num_tries = 0
@@ -83,24 +84,25 @@ def study_best_ratio(ratio):
 with (Path.cwd() / "data/studies/err_over_ratio.json").open("r+") as fp:
     results = json.load(fp)
 
-iterations= {}
-if results.get(int(num_pore)) is not None:
-    iterations = results[int(num_pore)]
-
-
-try:
-    for ratio in ratio_throat_pores:
-        variants = []
-        if iterations.get(ratio) is not None:
-            variants = iterations[ratio]
-        for _ in range(len(variants),10):
-            result = study_best_ratio(ratio)
-            variants.append(result)
-        iterations[ratio] = variants
-finally:
-    results[int(num_pore)] = iterations
-    with (Path.cwd() / "data/studies/err_over_ratio.json").open("w+") as fp:
-        json.dump(results, fp)
+for num_pore in num_pores:
+    iterations= {}
+    if results.get(int(num_pore)) is not None:
+        iterations = results[int(num_pore)]
+    
+    
+    try:
+        for ratio in ratio_throat_pores:
+            variants = []
+            if iterations.get(ratio) is not None:
+                variants = iterations[ratio]
+            for _ in range(len(variants),10):
+                result = study_best_ratio(ratio, num_pore)
+                variants.append(result)
+            iterations[ratio] = variants
+    finally:
+        results[int(num_pore)] = iterations
+        with (Path.cwd() / "data/studies/err_over_ratio.json").open("w+") as fp:
+            json.dump(results, fp)
 
 print("Study ended successfully!")
 
