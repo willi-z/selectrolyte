@@ -35,14 +35,13 @@ with (Path.cwd() / "data/networks/rand_0.54.json").open("r") as fp:
     content = json.load(fp)
 
 conf = NetworkConfig(**content)
-model = model_from_network(conf)
-net = model.network
-L = model.bounds[0]
+# model = model_from_network(conf)
+# net = model.network
+L = conf.bounds[0]
 
 
-DSpheres = net["pore.diameter"]
-coords = net["pore.coords"]
-
+DSpheres = conf.pores.diameters
+coords = np.array(conf.pores.coords)
 
 norm = matplotlib.colors.Normalize(vmin=np.min(DSpheres),vmax=np.max(DSpheres))
 cmap = matplotlib.colormaps["rainbow"]
@@ -55,8 +54,9 @@ for i in range(len(DSpheres)): # len(DSpheres)
     pl.add_mesh(mesh, color=cmap(norm(DSpheres[i])))
 
 
-DThroats = net["throat.diameter"]
-conns = net["throat.conns"]
+# if conf.conns is None:
+DThroats = conf.conns.diameters # ["throat.diameter"]
+conns = conf.conns.conns # ["throat.conns"]
 for i in range(len(conns)):
     conn = conns[i]
     pstart = coords[conn[0]]/L
@@ -64,8 +64,8 @@ for i in range(len(conns)):
     mesh = pyvista.Tube(pstart, pend, radius=DThroats[i]/2/L)
     pl.add_mesh(mesh)
 
-print(L)
-print(max(DThroats))
+# print(L)
+# print(max(DThroats))
 
 print("Finished!")
 pl.show()

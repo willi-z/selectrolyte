@@ -71,7 +71,7 @@ class RandomPoreGenerator(IPoreGenerator):
                         results = tree.query_ball_point(shadow_pos, radius_min)
                         for idx in results:
                             Dneigh = diameters[idx]
-                            dist_squard = ((coords[idx] - pos) ** 2).sum()
+                            dist_squard = ((coords[idx] - shadow_pos) ** 2).sum()
                             if dist_squard < ((Dneigh + Dthis) / 2 * 1.01) ** 2:
                                 success = False
                                 break

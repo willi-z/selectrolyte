@@ -1,0 +1,5 @@
+pyvista >= 0.43.3
+pydantic >= 2.6.1
+scipy >= 1.12.0
+openpnm >= 3.4.1
+pypardiso >= 0.4.4

@@ -3,6 +3,7 @@ from .distribution.idistribution import IDiameterDistribution
 from .generators.pores.ipore import IPoreGenerator
 from .generators.pores.helpers import get_pore_vol
 from .generators.conns.iconns import IConnsGenerator
+from .generators.conns.config import ConnsNetworkConfig
 import numpy as np
 
 from .config import NetworkModelConfig
@@ -30,7 +31,9 @@ def generate_network(
     # print("[generate_network] vol_throats:", throat_vol)
     # print(vol_ratio_throats_spheres, box_vol, box_length) # <---
     pore_config = pore_generator.generate(pore_diameters, bounds)
-    conns_config = conns_generator.generate(bounds, porosity, pore_config)
+    conns_config = ConnsNetworkConfig(conns=[], diameters=[])
+    if conns_generator is not None:
+        conns_config = conns_generator.generate(bounds, porosity, pore_config)
     return NetworkConfig(pores=pore_config, conns=conns_config, bounds=bounds, porosity=porosity)
 
 
@@ -79,12 +82,21 @@ def model_from_network(
     xPore = np.array(conf.pores.coords)[:, 0]
 
     inner_pores = np.ones(len(conf.pores.coords))
+    left_pores = np.full(len(conf.pores.coords), False, dtype=bool)
+    right_pores = np.full(len(conf.pores.coords), False, dtype=bool)
+    x_half = conf.bounds[0] / 2
+
     for i in range(len(conf.pores.coords)):
         pos = conf.pores.coords[i]
         if np.any(np.less(pos, np.zeros(3))):
             inner_pores[i] = 0
         elif np.any(np.greater(pos, conf.bounds)):
             inner_pores[i] = 0
+        else:
+            if pos[0] < x_half:
+                left_pores[i] = True
+            else:
+                right_pores[i] = True
     net["pore.inner"] = inner_pores
 
     throat_impact = np.ones(len(conf.conns.conns))
@@ -98,8 +110,11 @@ def model_from_network(
     net["pore.left"] = np.isclose(xPore, 0.0, atol=conf.bounds[0]*eps)
     net["pore.right"] = np.isclose(xPore, conf.bounds[0], atol=conf.bounds[0]*eps)
 
-    # print("left: ", np.where(net['pore.left'])[0])
-    # print("right: ", np.where(net['pore.right'])[0])
+    # net["pore.left"] = left_pores
+    # net["pore.right"] = right_pores
+
+    print("left: ", np.where(net['pore.left'])[0])
+    print("right: ", np.where(net['pore.right'])[0])
 
     Vol_void = np.sum(net['pore.volume'] * inner_pores)  +np.sum(net['throat.volume'] * net['throat.volume_impact'])
     Vol_bulk = conf.bounds[0] * conf.bounds[1] * conf.bounds[2]
