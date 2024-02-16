@@ -52,15 +52,22 @@ def interval_method(func, bounds: tuple, eps) -> tuple[float, float]:
     f0 = func(bounds[0])
     fm = func((bounds[0] + bounds[1] )/2)
     f1 = func(bounds[1])
+    # print("########")
+    # print("0.0", x0, f0)
+    # print("0.5", xm, fm)
+    # print("1.0", x1, f1)
     if x1 - x0 < eps:
+        # print("break")
         vals = [
-            (abs(f0), x0),
-            (abs(fm), xm),
-            (abs(f1), x1),
+            (f0, x0),
+            (fm, xm),
+            (f1, x1),
         ]
-        best_val = sorted(vals, key= lambda pair: pair[0])[0]
+        best_val = sorted(vals, key= lambda pair: abs(pair[0]))[0]
         return (best_val[1], best_val[0]) # (x, f)
     if fm * f0 < 0: # different sign
+        # print("0.0-0.5")
         return interval_method(func, (x0, xm), eps)
     else:
+        # print("0.5-1.0")
         return interval_method(func, (xm, x1), eps)

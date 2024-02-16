@@ -9,8 +9,8 @@ import numpy as np
 
 
 porosity = 0.54
-num_pore = 100
-ratio = 0.1
+num_pore = 1000
+ratio = 0.001
 
 distrib_file = './data/pore_distr_data.csv'
 # np.random.seed(0)

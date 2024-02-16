@@ -9,13 +9,15 @@ import json
 from pathlib import Path
 
 
-num_pores = [1000]
+num_pores = [2000]
 porosity = 0.54
-ratio_throat_pores = np.arange(0.010, 0.042, 0.002)
+ratio_throat_pores = np.arange(0.001, 0.1, 0.001)
 max_tries = 10
-num_variants = 4
+num_variants = 10
 
 distrib_file = './data/pore_distr_data.csv'
+
+study_result_file = (Path.cwd() / "data/studies/err_over_ratio.json")
 
 phys = op.models.collections.physics.basic
 del phys['throat.entry_pressure']
@@ -78,11 +80,11 @@ def study_best_ratio(ratio, num_pore):
         return D_eff - Deff_exact
 
     err = ratio_optimizer(ratio)
-    print(num_pore, ":", ratio)
+    print(num_pore, ":", ratio, ", ERRROR:", err)
     return err
 
 
-with (Path.cwd() / "data/studies/err_over_ratio.json").open("r+") as fp:
+with study_result_file.open("r+") as fp:
     results = json.load(fp)
 
 for num_pore in num_pores:
@@ -102,7 +104,7 @@ for num_pore in num_pores:
             iterations[ratio] = variants
     finally:
         results[int(num_pore)] = iterations
-        with (Path.cwd() / "data/studies/err_over_ratio.json").open("w+") as fp:
+        with study_result_file.open("w+") as fp:
             json.dump(results, fp)
 
 print("Study ended successfully!")

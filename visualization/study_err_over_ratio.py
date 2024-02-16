@@ -49,10 +49,11 @@ Deff_exact = 0.000005321864708362311
 plt.rcParams.update(plot_config)
 fig,ax = plt.subplots(figsize=(4,3))
 
-num_pore = 1000
+num_pore = 800
 
 # process data
-with (Path.cwd() / "data/studies/err_over_ratio.json").open("r") as fp:
+# Path.cwd() / "data/studies/err_over_ratio.json"
+with Path("/home/willi/Nextcloud/HTWK/share/selectrolzte//err_over_ratio.json").open("r") as fp:
     data = json.load(fp)
 
 xs = []
@@ -61,13 +62,15 @@ ys = []
 ratios = data[str(num_pore)]
 for ratio, err in ratios.items():
     print(float(ratio))
-    xs.append(ratio)
+    xs.append(float(ratio))
     err = np.array(err)
     rel_err = err / Deff_exact * 100 
-    ys.append(rel_err[0])
+    ys.append(np.mean(rel_err))
+    # ys.append(rel_err[0])
 
+print(len(xs), len(ys))
 
-# ax.boxplot(x=ys, positions=xs, widths=20)
+# ax.boxplot(x=ys, positions=xs, widths=0.01)
 ax.plot(xs, ys)
 
 ax.set_xlabel(r"$n_p \; \left[ \; \right]$")

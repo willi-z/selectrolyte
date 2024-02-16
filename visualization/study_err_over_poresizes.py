@@ -49,10 +49,11 @@ Deff_exact = 0.000005321864708362311
 plt.rcParams.update(plot_config)
 fig,ax = plt.subplots(figsize=(4,3))
 
-ratio = 0.06
+ratio = 0.02
 
 # process data
-with (Path.cwd() / "data/studies/err_over_ratio.json").open("r") as fp:
+# (Path.cwd() / "data/studies/err_over_ratio.json")
+with Path("/home/willi/Nextcloud/HTWK/share/selectrolzte//err_over_ratio.json").open("r") as fp:
     data = json.load(fp)
 
 xs = []
