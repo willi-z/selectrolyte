@@ -110,11 +110,11 @@ def model_from_network(
     net["pore.left"] = np.isclose(xPore, 0.0, atol=conf.bounds[0]*eps)
     net["pore.right"] = np.isclose(xPore, conf.bounds[0], atol=conf.bounds[0]*eps)
 
-    # net["pore.left"] = left_pores
-    # net["pore.right"] = right_pores
+    net["pore.left"] = left_pores
+    net["pore.right"] = right_pores
 
-    print("left: ", np.where(net['pore.left'])[0])
-    print("right: ", np.where(net['pore.right'])[0])
+    # print("left: ", np.where(net['pore.left'])[0])
+    # print("right: ", np.where(net['pore.right'])[0])
 
     Vol_void = np.sum(net['pore.volume'] * inner_pores)  +np.sum(net['throat.volume'] * net['throat.volume_impact'])
     Vol_bulk = conf.bounds[0] * conf.bounds[1] * conf.bounds[2]
