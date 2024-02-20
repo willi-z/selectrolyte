@@ -11,7 +11,7 @@ from typing import Callable
 class NearestConnsGenerator(IConnsGenerator):
     def __init__(
         self, 
-        num_neighbours: int = 3, 
+        num_neighbours: int = 1, # 3, 
         dfunc: Callable[[float, float, float], float] = 
         lambda d0, d1, distance: min(d0, d1)
         ):
@@ -49,6 +49,9 @@ class NearestConnsGenerator(IConnsGenerator):
 
             if self.num_neighbours is not None:
                 distances, nidxs = tree.query(pos, self.num_neighbours)
+                if self.num_neighbours == 1:
+                    nidxs = [nidxs]
+                    distances = [distances]
                 
                 for j in range(len(nidxs)):
                     idx = nidxs[j]

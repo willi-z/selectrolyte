@@ -49,11 +49,11 @@ Deff_exact = 0.000005321864708362311
 plt.rcParams.update(plot_config)
 fig,ax = plt.subplots(figsize=(4,3))
 
-num_pore = 800
+num_pore = 2000
 
 # process data
 # Path.cwd() / "data/studies/err_over_ratio.json"
-with Path("/home/willi/Nextcloud/HTWK/share/selectrolzte//err_over_ratio.json").open("r") as fp:
+with Path("/home/willi/Nextcloud/HTWK/share/selectrolyte/err_over_ratio.json").open("r") as fp:
     data = json.load(fp)
 
 xs = []
@@ -73,7 +73,7 @@ print(len(xs), len(ys))
 # ax.boxplot(x=ys, positions=xs, widths=0.01)
 ax.plot(xs, ys)
 
-ax.set_xlabel(r"$n_p \; \left[ \; \right]$")
+ax.set_xlabel(r"$r \; \left[ \; \right]$")
 ax.set_ylabel(r"$rel. err \; \left[ \% \right]$")
 """
 ax.legend(loc='lower right', 

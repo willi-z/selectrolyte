@@ -58,10 +58,20 @@ class RandomPoreGenerator(IPoreGenerator):
                 shadow_pores = []
                 for e in range(3):
                     if (pos[e] - Dthis/2)  < 0.0:
+                        _shadow_pores_clone = np.array(shadow_pores, copy=True)
+                        for idx in range(len(_shadow_pores_clone)):
+                            _shadow_pores_clone[idx][e] += bounds[e]
+                        if len(_shadow_pores_clone) > 0:
+                            shadow_pores = shadow_pores + list(_shadow_pores_clone)
                         shadow_pos = np.array(pos)
                         shadow_pos[e] += bounds[e]
                         shadow_pores.append(shadow_pos)
                     if (pos[e] + Dthis/2) > bounds[e]:
+                        _shadow_pores_clone = np.array(shadow_pores, copy=True)
+                        for idx in range(len(_shadow_pores_clone)):
+                            _shadow_pores_clone[idx][e] -= bounds[e]
+                        if len(_shadow_pores_clone) > 0:
+                            shadow_pores = shadow_pores + list(_shadow_pores_clone)
                         shadow_pos = np.array(pos)
                         shadow_pos[e] -= bounds[e]
                         shadow_pores.append(shadow_pos)
