@@ -11,7 +11,7 @@ from typing import Callable
 class NearestConnsGenerator(IConnsGenerator):
     def __init__(
         self, 
-        num_neighbours: int = 1, # 3, 
+        num_neighbours: int = 4, # 3, 
         dfunc: Callable[[float, float, float], float] = 
         lambda d0, d1, distance: min(d0, d1)
         ):
@@ -47,6 +47,7 @@ class NearestConnsGenerator(IConnsGenerator):
             pos = np.array(pores.coords[i])
             Dthis = pores.diameters[i]
 
+
             if self.num_neighbours is not None:
                 distances, nidxs = tree.query(pos, self.num_neighbours)
                 if self.num_neighbours == 1:
@@ -63,22 +64,23 @@ class NearestConnsGenerator(IConnsGenerator):
                     tubes[frozenset([idx, i])]=DTube
                     
 
-            radius_max = (pores.diameters[i] + Dmax)/2 *2.6
-            results = tree.query_ball_point(pos, radius_max)
-            neighbours = set(results)
-            neighbours.remove(i)
-            # print(len(neighbours))
-            if neighbours is None:
-                continue
-            for idx in neighbours:
-                Dneigh = pores.diameters[idx]
-                pos_neigh = np.array(pores.coords[idx])
-                distance = np.sqrt(((pos_neigh - pos)**2).sum())
-                distance_max = (Dneigh + Dthis)/2 * 1.2
-                if distance > distance_max:
+            if False:
+                radius_max = (pores.diameters[i] + Dmax)/2 *2.6
+                results = tree.query_ball_point(pos, radius_max)
+                neighbours = set(results)
+                neighbours.remove(i)
+                # print(len(neighbours))
+                if neighbours is None:
                     continue
-                DTube = self.dfunc(Dthis, Dneigh, distance)
-                tubes[frozenset([idx, i])]=DTube
+                for idx in neighbours:
+                    Dneigh = pores.diameters[idx]
+                    pos_neigh = np.array(pores.coords[idx])
+                    distance = np.sqrt(((pos_neigh - pos)**2).sum())
+                    distance_max = (Dneigh + Dthis)/2 * 1.2
+                    if distance > distance_max:
+                        continue
+                    DTube = self.dfunc(Dthis, Dneigh, distance)
+                    tubes[frozenset([idx, i])]=DTube
 
         conns = []
         diameters = []
