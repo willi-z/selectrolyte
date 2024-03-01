@@ -32,7 +32,7 @@ def generate_network(
     # print(vol_ratio_throats_spheres, box_vol, box_length) # <---
     pore_config = pore_generator.generate(pore_diameters, bounds)
 
-    print("pore:", pore_config.vol, "(vs.",pore_vol, "diff:", pore_vol-pore_config.vol,"-> SHOULD be POSITIVE!!!)")
+    # print("pore:", pore_config.vol, "(vs.",pore_vol, "diff:", pore_vol-pore_config.vol,"-> SHOULD be POSITIVE!!!)")
 
     conns_config = ConnsNetworkConfig(conns=[], diameters=[])
     if conns_generator is not None:
