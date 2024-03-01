@@ -1,7 +1,7 @@
 from .ipore import IPoreGenerator, PoreNetworkConfig
 from scipy.spatial import KDTree
 import numpy as np
-from .helpers import iso_2_coord
+from .helpers import get_pore_vol, iso_2_coord
 
 
 class RandomPoreGenerator(IPoreGenerator):
@@ -19,11 +19,11 @@ class RandomPoreGenerator(IPoreGenerator):
         drops = []
         # np.random.seed(0)
         coords = [] # iso_2_coord(np.random.rand(3), ((0, 0, 0), bounds))
+        pore_ids = []
  
         # grid = VoxelGrid(bounds, Dmin)
         # grid.remove_filled_voxels(coords[0], diameters[0])
         cidx = 0
-
         while cidx < len(diameters):
             
             Dthis = diameters[cidx]
@@ -31,8 +31,6 @@ class RandomPoreGenerator(IPoreGenerator):
             # radius = box_length
             success = False
             pos = None
-            shadow_pores = [] # in case an overhang occures
-
             counter = 0
 
             tree = None
@@ -55,7 +53,7 @@ class RandomPoreGenerator(IPoreGenerator):
                             success = False
                             break
 
-                shadow_pores = []
+                shadow_pores = [] # in case an overhang occures
                 for e in range(3):
                     if (pos[e] - Dthis/2)  < 0.0:
                         _shadow_pores_clone = np.array(shadow_pores, copy=True)
@@ -87,16 +85,27 @@ class RandomPoreGenerator(IPoreGenerator):
                                 break
             
             if success and pos is not None:
+                pore_id = cidx
+                pore_ids.append(pore_id)
                 coords.append(pos)
                 for shadow_pos in shadow_pores:
                     coords.append(shadow_pos)
+                    pore_ids.append(pore_id)
                     diameters = np.insert(diameters, cidx, Dthis)
                     cidx += 1
             else:
                 drops.append(cidx)
             cidx += 1
 
-        Dmin = diameters[-1]
+        # Dmin = diameters[-1]
         Dpores = np.delete(diameters, drops)[: len(coords)]
 
-        return PoreNetworkConfig(coords=coords, diameters=Dpores, min_diameter=Dmin)
+        unique_pores = np.ones(len(Dpores))
+        for i in range(len(Dpores)):
+            if i > 0:
+                if pore_ids[i-1] == pore_ids[i]:
+                    unique_pores[i] = 0
+
+        vol_pores = get_pore_vol(Dpores * unique_pores)
+
+        return PoreNetworkConfig(coords=coords, diameters=Dpores, pore_ids=pore_ids, vol=vol_pores)

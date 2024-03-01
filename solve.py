@@ -8,11 +8,13 @@ import numpy as np
 with (Path.cwd() / "data/networks/rand_0.54.json").open("r") as fp:
     content = json.load(fp)
 
+BC_Scale = 1.0
 conf = NetworkConfig(**content)
-model = model_from_network(conf)
+model = model_from_network(conf, BC_Scale = BC_Scale)
 net = model.network
+
 L = model.bounds[0]
-A = model.bounds[1] * model.bounds[2]
+A = model.bounds[1] * model.bounds[2] * BC_Scale**2
 
 # phase
 # liquid = op.phase.Water(network=net)
@@ -36,6 +38,13 @@ if not np.isfinite(fd.A.data).all():
 if not np.isfinite(fd.b).all():
     print("b")
 
+
+
+
+
+#net["pore.left"] = bc_left
+# net["pore.right"] = bc_right
+
 inlet = net.pores('left')
 outlet = net.pores('right')
 C_in, C_out = [10, 5]
@@ -54,7 +63,7 @@ print("The effective  diffusivity is: {0:.6E} m/s^2".format(D_eff))
 exact = 0.000005321864708362311 # [S/cm] O1_50% at 24.5°C
 # exact = exact * 100 # [S/cm] -> [S/m]
 print("abs. error", D_eff - exact)
-print("rel. error: ", abs(D_eff - exact) / exact)
+print("rel. error: ", abs(D_eff - exact) / exact * 100 , "%")
 D_AB = electrolyte['pore.diffusivity'][0]
 tau = model.porosity * D_AB / D_eff
 print('The tortuosity is:', "{0:.6E}".format(tau))

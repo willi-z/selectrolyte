@@ -49,11 +49,13 @@ Deff_exact = 0.000005321864708362311
 plt.rcParams.update(plot_config)
 fig,ax = plt.subplots(figsize=(4,3))
 
-num_pore = 2000
+num_pore = 1000
 
+inputDir = Path("/home/willi/Nextcloud/HTWK/share/selectrolyte/bc_intersecting")
+outputDir = inputDir
 # process data
 # Path.cwd() / "data/studies/err_over_ratio.json"
-with Path("/home/willi/Nextcloud/HTWK/share/selectrolyte/err_over_ratio.json").open("r") as fp:
+with (inputDir / "err_over_ratio.json").open("r") as fp:
     data = json.load(fp)
 
 xs = []
@@ -82,6 +84,6 @@ ax.legend(loc='lower right',
 
 fig.tight_layout(pad=0)
 
-outputDir = Path().cwd() / "results"
+#outputDir = Path().cwd() / "results"
 plt.savefig(outputDir / (f"study_err_over_ratio_{num_pore}" + '.pdf'))
 # plt.show()

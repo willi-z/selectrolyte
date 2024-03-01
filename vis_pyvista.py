@@ -35,8 +35,8 @@ with (Path.cwd() / "data/networks/rand_0.54.json").open("r") as fp:
     content = json.load(fp)
 
 conf = NetworkConfig(**content)
-# model = model_from_network(conf)
-# net = model.network
+model = model_from_network(conf, BC_Scale=1.0)
+net = model.network
 L = conf.bounds[0]
 
 
@@ -47,11 +47,15 @@ norm = matplotlib.colors.Normalize(vmin=np.min(DSpheres),vmax=np.max(DSpheres))
 cmap = matplotlib.colormaps["rainbow"]
 
 
+
 for i in range(len(DSpheres)): # len(DSpheres)
-    dia = DSpheres[i]/2/L
-    mesh = pyvista.Sphere(dia)
+    opacity = 0.2
+    if net["pore.left"][i] or net["pore.right"][i]:
+        opacity = 1.0
+    radius = DSpheres[i]/2/L
+    mesh = pyvista.Sphere(radius)
     mesh.translate((coords[i]/L), inplace=True)
-    pl.add_mesh(mesh, color=cmap(norm(DSpheres[i])))
+    pl.add_mesh(mesh, opacity=opacity, color=cmap(norm(DSpheres[i])))
 
 
 # if conf.conns is None:

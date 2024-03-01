@@ -8,7 +8,7 @@ def calc_porosity(
     conns:  list[tuple[int, int]],
     conns_dia: list[float],
     vol_bounds: float,
-    inner_pores,
+    pores_vol: float,
     throat_impact
     )-> float:
     net = op.network.Network(coords=pores_coords, conns=conns)
@@ -40,7 +40,7 @@ def calc_porosity(
     )
     net.regenerate_models()
 
-    Vol_void = np.sum(net['pore.volume'] * inner_pores) + np.sum(net['throat.volume'] * throat_impact)
+    Vol_void = pores_vol + np.sum(net['throat.volume'] * throat_impact)
     Vol_bulk = vol_bounds
     return Vol_void / Vol_bulk
 
