@@ -29,7 +29,7 @@ plot_config={
     "figure.edgecolor": "black",
 
     # grid
-    "axes.grid": True,
+    #"axes.grid": True,
     "grid.color": "grey",
     "grid.linestyle": "dashed",
     
@@ -52,8 +52,8 @@ fig,ax = plt.subplots(figsize=(4,3))
 ratio = 0.02
 
 # process data
-# (Path.cwd() / "data/studies/err_over_ratio.json")
-with Path("/home/willi/Nextcloud/HTWK/share/selectrolzte//err_over_ratio.json").open("r") as fp:
+inputDir = Path("/home/willi/Nextcloud/HTWK/share/selectrolyte/convergence_study")
+with (inputDir / "err_over_ratio.json").open("r") as fp:
     data = json.load(fp)
 
 xs = []
@@ -68,7 +68,7 @@ for num_pore, ratios in data.items():
     ys.append(rel_err)
 
 
-ax.boxplot(x=ys, positions=xs, widths=20)
+ax.boxplot(x=ys, positions=xs, widths=100)
 
 ax.set_xlabel(r"$n_p \; \left[ \; \right]$")
 ax.set_ylabel(r"$rel. err \; \left[ \% \right]$")
@@ -80,5 +80,5 @@ ax.legend(loc='lower right',
 fig.tight_layout(pad=0)
 
 outputDir = Path().cwd() / "results"
-plt.savefig(outputDir / (f"study_err_over_poresizes_{ratio}" + '.pdf'))
+plt.savefig(inputDir / (f"study_err_over_poresizes_{ratio}" + '.pdf'))
 # plt.show()

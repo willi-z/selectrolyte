@@ -8,11 +8,19 @@ from pathlib import Path
 import numpy as np
 
 
-porosity = 0.54
-num_pore = 500
-ratio = 0.005
 
-distrib_file = './data/pore_distr_data.csv'
+specimens = ["O1_50", "O2_40", "O4_40"]
+specimen = specimens[0]
+porosity_str = '0.50'
+num_pore_str = '1000'
+ratio_str = '0.02'
+
+porosity = float(porosity_str)
+num_pore = int(num_pore_str)
+ratio = float(ratio_str)
+print(ratio)
+
+distrib_file = './data/poresizes/comulative_pore_volume/' + specimen + '.csv'
 # np.random.seed(0)
 
 conf = generate_network(
@@ -24,7 +32,7 @@ conf = generate_network(
     NearestConnsGenerator()
 )
 
-config_file = f"data/networks/rand_{porosity}.json"
+config_file = f"data/networks/{specimen}_{num_pore_str}_{porosity_str}_{ratio_str}.json"
 
 
 with (Path.cwd() / config_file).open("w+") as fp:

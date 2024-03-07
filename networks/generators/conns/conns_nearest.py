@@ -11,7 +11,7 @@ from typing import Callable
 class NearestConnsGenerator(IConnsGenerator):
     def __init__(
         self, 
-        num_neighbours: int = 4, # 3, 
+        num_neighbours: int = 3, # 3, 
         dfunc: Callable[[float, float, float], float] = 
         lambda d0, d1, distance: min(d0, d1)
         ):

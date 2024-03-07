@@ -110,12 +110,12 @@ def model_from_network(
                 bc_right[i] = True
     
     throat_impact = np.ones(len(conf.conns.conns))
-    #for i in range(len(throat_impact)):
-        # conns = conf.conns.conns[i]
-        # if inner_pores[conns[0]] == 0:
-        #     throat_impact[i] -= 0.5
-        # if inner_pores[conns[1]] == 0:
-        #     throat_impact[i] -= 0.5
+    # for i in range(len(throat_impact)):
+    #     conns = conf.conns.conns[i]
+    #     if inner_pores[conns[0]] == 0:
+    #         throat_impact[i] -= 0.5
+    #     if inner_pores[conns[1]] == 0:
+    #         throat_impact[i] -= 0.5
     net['throat.volume_impact'] = throat_impact
 
     net["pore.left"] = bc_left

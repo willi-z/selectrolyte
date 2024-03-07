@@ -5,7 +5,13 @@ import json
 import openpnm as op
 import numpy as np
 
-with (Path.cwd() / "data/networks/rand_0.54.json").open("r") as fp:
+specimens = ["O1_50", "O2_40", "O4_40"]
+specimen = specimens[0]
+porosity_str = '0.50'
+num_pore_str = '1000'
+ratio_str = '0.02'
+
+with (Path.cwd() / f"data/networks/{specimen}_{num_pore_str}_{porosity_str}_{ratio_str}.json").open("r") as fp:
     content = json.load(fp)
 
 BC_Scale = 1.0

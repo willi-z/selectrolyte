@@ -8,14 +8,15 @@ import openpnm as op
 import json
 from pathlib import Path
 
-
-num_pores = [2000]
-porosity = 0.54
-ratio_throat_pores = np.arange(0.001, 0.1, 0.001)
+specimens = ["O1_50", "O2_40", "O4_40"]
+specimen = specimens[0]
+num_pores = [100, 500, 1000, 1500, 2000, 2500, 3000, 3500]
+porosity = 0.5
+ratio_throat_pores = np.arange(0.01, 0.05, 0.01)
 max_tries = 10
-num_variants = 10
+num_variants = 30
 
-distrib_file = './data/pore_distr_data.csv'
+distrib_file = './data/poresizes/comulative_pore_volume/' + specimen + '.csv'
 
 study_result_file = (Path.cwd() / "data/studies/err_over_ratio.json")
 
