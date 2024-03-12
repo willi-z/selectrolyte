@@ -11,11 +11,12 @@ import numpy as np
 
 specimens = ["O1_50", "O2_40", "O4_40"]
 specimen = specimens[0]
-porosity_str = '0.50'
-num_pore_str = '1000'
-ratio_str = '0.02'
+num_pore_str = '3000'
+ratio_str = '0.01'
 
-porosity = float(porosity_str)
+with (Path.cwd() / f"data/data.json").open("r") as fp:
+    data = json.load(fp)
+porosity = data[specimen]["porosity"]
 num_pore = int(num_pore_str)
 ratio = float(ratio_str)
 print(ratio)
@@ -32,7 +33,7 @@ conf = generate_network(
     NearestConnsGenerator()
 )
 
-config_file = f"data/networks/{specimen}_{num_pore_str}_{porosity_str}_{ratio_str}.json"
+config_file = f"data/networks/{specimen}_{num_pore_str}_{ratio_str}.json"
 
 
 with (Path.cwd() / config_file).open("w+") as fp:

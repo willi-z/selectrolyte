@@ -38,7 +38,7 @@ class RandomPoreGenerator(IPoreGenerator):
                 tree = KDTree(
                     coords,
                 )
-            while counter < 1000 and not success:
+            while counter < 100000 and not success:
                 counter += 1
                 success = True
                 iso_coord = np.random.rand(3)
@@ -97,6 +97,7 @@ class RandomPoreGenerator(IPoreGenerator):
                 drops.append(cidx)
             cidx += 1
 
+        print("no. of deleted pores:", len(drops))
         # Dmin = diameters[-1]
         Dpores = np.delete(diameters, drops)[: len(coords)]
 

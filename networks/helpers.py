@@ -19,7 +19,7 @@ def generate_network(
     pore_generator: IPoreGenerator,
     conns_generator: IConnsGenerator
     ) -> NetworkConfig:
-    assert 0 < vol_ratio_throats_spheres < 1.0
+    # assert 0 < vol_ratio_throats_spheres < 1.0
     pore_diameters = diameter_generator.generate_n_diameters(num_pores)
     pore_vol = get_pore_vol(pore_diameters)
     throat_vol = pore_vol * vol_ratio_throats_spheres

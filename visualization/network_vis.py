@@ -13,8 +13,8 @@ from networks.helpers import model_from_network
 specimens = ["O1_50", "O2_40", "O4_40"]
 specimen = specimens[0]
 porosity_str = '0.50'
-num_pore_str = '1000'
-ratio_str = '0.02'
+num_pore_str = '3000'
+ratio_str = '0.07'
 
 
 # pc.plot(cmap='Reds')

@@ -6,12 +6,13 @@ from scipy.spatial import KDTree
 from .helpers import calc_porosity, interval_method
 import numpy as np
 from typing import Callable
+import random
 
 
 class NearestConnsGenerator(IConnsGenerator):
     def __init__(
         self, 
-        num_neighbours: int = 3, # 3, 
+        num_neighbours: int = 4, # 3, 
         dfunc: Callable[[float, float, float], float] = 
         lambda d0, d1, distance: min(d0, d1)
         ):
@@ -41,38 +42,38 @@ class NearestConnsGenerator(IConnsGenerator):
             pos = np.array(pores.coords[i])
             Dthis = pores.diameters[i]
 
+            if True:
+                if self.num_neighbours is not None:
+                    distances, nidxs = tree.query(pos, self.num_neighbours)
+                    if self.num_neighbours == 1:
+                        nidxs = [nidxs]
+                        distances = [distances]
 
-            if self.num_neighbours is not None:
-                distances, nidxs = tree.query(pos, self.num_neighbours)
-                if self.num_neighbours == 1:
-                    nidxs = [nidxs]
-                    distances = [distances]
-                
-                for j in range(len(nidxs)):
-                    idx = nidxs[j]
-                    distance = distances[j]
-                    if idx == i:
-                        continue
-                    Dneigh = pores.diameters[idx]
-                    DTube = self.dfunc(Dthis, Dneigh, distance)
-                    tubes[frozenset([idx, i])]=DTube
+                    for j in random.sample(range(len(nidxs)), min(len(nidxs), self.num_neighbours)):
+                        idx = nidxs[j]
+                        distance = distances[j]
+                        if idx == i:
+                            continue
+                        Dneigh = pores.diameters[idx]
+                        DTube = self.dfunc(Dthis, Dneigh, distance)
+                        tubes[frozenset([idx, i])]=DTube
                     
 
             if False:
-                radius_max = (pores.diameters[i] + Dmax)/2 *2.6
+                radius_max = (pores.diameters[i] + Dmax)/2 * 1.4
                 results = tree.query_ball_point(pos, radius_max)
                 neighbours = set(results)
                 neighbours.remove(i)
                 # print(len(neighbours))
                 if neighbours is None:
                     continue
-                for idx in neighbours:
+                for idx in random.sample(neighbours, min(len(neighbours), self.num_neighbours)):
                     Dneigh = pores.diameters[idx]
                     pos_neigh = np.array(pores.coords[idx])
                     distance = np.sqrt(((pos_neigh - pos)**2).sum())
-                    distance_max = (Dneigh + Dthis)/2 * 1.2
-                    if distance > distance_max:
-                        continue
+                    #distance_max = (Dneigh + Dthis)/2 * 1.2
+                    #if distance > distance_max:
+                        # continue
                     DTube = self.dfunc(Dthis, Dneigh, distance)
                     tubes[frozenset([idx, i])]=DTube
 

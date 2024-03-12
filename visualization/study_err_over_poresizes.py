@@ -49,10 +49,10 @@ Deff_exact = 0.000005321864708362311
 plt.rcParams.update(plot_config)
 fig,ax = plt.subplots(figsize=(4,3))
 
-ratio = 0.02
+ratio = 0.03
 
 # process data
-inputDir = Path("/home/willi/Nextcloud/HTWK/share/selectrolyte/convergence_study")
+inputDir = Path("/home/willi/Nextcloud/HTWK/share/selectrolyte")
 with (inputDir / "err_over_ratio.json").open("r") as fp:
     data = json.load(fp)
 
@@ -61,6 +61,8 @@ ys = []
 for num_pore, ratios in data.items():
     if len(ratios) == 0:
         continue
+    if int(num_pore) < 1000:
+        continue    
     xs.append(int(num_pore))
     print(num_pore)
     err = np.array(ratios[str(ratio)])

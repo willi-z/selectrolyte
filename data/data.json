@@ -1,0 +1,9 @@
+{
+    "O1":   {"conductivity": 0.00024},
+    "O2":   {"conductivity": 0.000026},
+    "O4":   {"conductivity": 0.0000026},
+    "O1_40": {"conductor": "O1",  "porosity": 0.40, "conductivity": 0.000005321864708362311},
+    "O1_50": {"conductor": "O1", "porosity": 0.5, "conductivity": 0.000017892028219210898},
+    "O2_40": {"conductor": "O2", "porosity": 0.40, "conductivity": 7.943282347242822e-7},
+    "O4_40": {"conductor": "O4", "porosity": 0.40, "conductivity": 1.8755745382074678e-7}
+}

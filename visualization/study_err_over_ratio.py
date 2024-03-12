@@ -49,9 +49,9 @@ Deff_exact = 0.000005321864708362311
 plt.rcParams.update(plot_config)
 fig,ax = plt.subplots(figsize=(4,3))
 
-num_pore = 2000
+num_pore = 3000
 
-inputDir = Path("/home/willi/Nextcloud/HTWK/share/selectrolyte/2000")
+inputDir = Path("/home/willi/Nextcloud/HTWK/share/selectrolyte/")
 outputDir = inputDir
 # process data
 # Path.cwd() / "data/studies/err_over_ratio.json"

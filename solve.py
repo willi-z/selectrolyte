@@ -7,11 +7,14 @@ import numpy as np
 
 specimens = ["O1_50", "O2_40", "O4_40"]
 specimen = specimens[0]
-porosity_str = '0.50'
-num_pore_str = '1000'
-ratio_str = '0.02'
+num_pore_str = '3000'
+ratio_str = '0.01'
 
-with (Path.cwd() / f"data/networks/{specimen}_{num_pore_str}_{porosity_str}_{ratio_str}.json").open("r") as fp:
+
+with (Path.cwd() / f"data/data.json").open("r") as fp:
+    data = json.load(fp)
+
+with (Path.cwd() / f"data/networks/{specimen}_{num_pore_str}_{ratio_str}.json").open("r") as fp:
     content = json.load(fp)
 
 BC_Scale = 1.0
@@ -31,7 +34,7 @@ phys = op.models.collections.physics.basic
 del phys['throat.entry_pressure']
 electrolyte.add_model_collection(phys)
 electrolyte["pore.viscosity"] = 0.05  # [Pa.s] seems to have no impact -> unrelevent
-electrolyte["throat.diffusivity"] = 0.00023859403095188725  # [S/cm] ionic conductivity O1 at 24.5°C
+electrolyte["throat.diffusivity"] = data[data[specimen]["conductor"]]["conductivity"] # 0.00023859403095188725  # [S/cm] ionic conductivity O1 at 24.5°C
 # electrolyte["throat.diffusivity"] = electrolyte["throat.diffusivity"] * 100 # [S/cm] -> [S/m]
 electrolyte.regenerate_models()
 
@@ -66,10 +69,10 @@ print(f'Molar flow rate: {rate_inlet:.5e} mol/s')
 D_eff = rate_inlet * L / (A * (C_in - C_out))
 print("The effective  diffusivity is: {0:.6E} m/s^2".format(D_eff))
 # 
-exact = 0.000005321864708362311 # [S/cm] O1_50% at 24.5°C
+exact = data[specimen]["conductivity"] # 0.000005321864708362311 # [S/cm] O1_50% at 24.5°C
 # exact = exact * 100 # [S/cm] -> [S/m]
 print("abs. error", D_eff - exact)
-print("rel. error: ", abs(D_eff - exact) / exact * 100 , "%")
+print("rel. error: ", (D_eff - exact) / exact * 100 , "%")
 D_AB = electrolyte['pore.diffusivity'][0]
 tau = model.porosity * D_AB / D_eff
 print('The tortuosity is:', "{0:.6E}".format(tau))
