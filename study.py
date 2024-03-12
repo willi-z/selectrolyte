@@ -11,7 +11,7 @@ import itertools
 
 specimens = ["O1_50", "O2_40", "O4_40"]
 num_pores = [3000] # [100, 500, 1000, 1500, 2000, 2500, 3000, 3500]
-porosity = 0.5
+
 ratio_throat_pores = [
     0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 
     0.01,  0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09,
@@ -36,6 +36,7 @@ with (Path.cwd() / f"data/data.json").open("r") as fp:
 def study(specimen, num_pore, ratio):
     distrib_file = './data/poresizes/comulative_pore_volume/' + specimen + '.csv'
     Deff_exact = data[specimen]["conductivity"]
+    porosity = data[specimen]["porosity"]
     def ratio_optimizer(ratio):
         num_tries = 0
         success = False
