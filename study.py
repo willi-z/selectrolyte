@@ -8,6 +8,11 @@ import openpnm as op
 import json
 from pathlib import Path
 import itertools
+from multiprocessing import Pool
+from datetime import timedelta
+import time
+
+start = time.time()
 
 specimens = ["O1_50", "O2_40", "O4_40"]
 num_pores = [3000] # [100, 500, 1000, 1500, 2000, 2500, 3000, 3500]
@@ -98,33 +103,33 @@ def study(specimen, num_pore, ratio):
 with study_result_file.open("r+") as fp:
     results = json.load(fp)
 
-for combi in combinations:
-    iterations= {}
+for i in range(len(combinations)):
+    combi = combinations[i]
     specimen, num_pore, ratio = combi[0], combi[1], combi[2]
-    if results.get(specimen) is not None:
-        iterations = results[int(num_pore)]
-    else:
-        iterations[specimen] = {}
     
-    if iterations[specimen].get(int(num_pore)) is None:
-        iterations[specimen][int(num_pore)] = {}
+    if results.get(specimen) is None:
+        results[specimen] = {}
+    
+    if results[specimen].get(int(num_pore)) is None:
+        results[specimen][int(num_pore)] = {}
 
-    if iterations[specimen][int(num_pore)].get(str(ratio)) is None:
-        iterations[specimen][int(num_pore)][str(ratio)] = []
+    if results[specimen][int(num_pore)].get(str(ratio)) is None:
+        results[specimen][int(num_pore)][str(ratio)] = []
     
+    def process(id):
+        return study(specimen, num_pore, ratio)
     
     try:
-        variants = []
-        if iterations[specimen][int(num_pore)].get(str(ratio)) is not None:
-            variants = iterations[specimen][int(num_pore)][str(ratio)]
-        for _ in range(len(variants),num_variants):
-            result = study(specimen, num_pore, ratio)
-            variants.append(result)
-        iterations[specimen][int(num_pore)][str(ratio)] = variants
+        variants = results[specimen][int(num_pore)][str(ratio)]
+        with Pool() as pool: 
+            result = pool.map(process, range(len(variants),num_variants))
+        results[specimen][int(num_pore)][str(ratio)] = variants + result
     finally:
-        results[int(num_pore)] = iterations
         with study_result_file.open("w+") as fp:
             json.dump(results, fp)
+    
+    elapsed = (time.time() - start)
+    print(f"finished {i}/{len(combinations)}: elapsed time: " + str(timedelta(seconds=elapsed)))
 
 print("Study ended successfully!")
 
