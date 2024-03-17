@@ -110,20 +110,22 @@ for i in range(len(combinations)):
     if results.get(specimen) is None:
         results[specimen] = {}
     
-    if results[specimen].get(int(num_pore)) is None:
-        results[specimen][int(num_pore)] = {}
+    if results[specimen].get(str(num_pore)) is None:
+        results[specimen][str(num_pore)] = {}
 
-    if results[specimen][int(num_pore)].get(str(ratio)) is None:
-        results[specimen][int(num_pore)][str(ratio)] = []
+    if results[specimen][str(num_pore)].get(str(ratio)) is None:
+        results[specimen][str(num_pore)][str(ratio)] = []
     
     def process(id):
         return study(specimen, num_pore, ratio)
     
     try:
-        variants = results[specimen][int(num_pore)][str(ratio)]
-        with Pool() as pool: 
-            result = pool.map(process, range(len(variants),num_variants))
-        results[specimen][int(num_pore)][str(ratio)] = variants + result
+        variants = results[specimen][str(num_pore)][str(ratio)]
+        #with Pool() as pool: 
+        # result = pool.map(process, range(len(variants),num_variants))
+        for id in range(len(variants),num_variants):
+            results[specimen][str(num_pore)][str(ratio)].append(process(id))
+        #results[specimen][str(num_pore)][str(ratio)] = variants + result
     finally:
         with study_result_file.open("w+") as fp:
             json.dump(results, fp)
