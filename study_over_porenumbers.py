@@ -106,7 +106,7 @@ with study_result_file.open("r+") as fp:
 
 for i in range(len(combinations)):
     combi = combinations[i]
-    specimen, num_pore = combi[0], combi[1], combi[2]
+    specimen, num_pore = combi[0], combi[1]
     ratio = ratio_throat_pores[specimen]
     
     if results.get(specimen) is None:
