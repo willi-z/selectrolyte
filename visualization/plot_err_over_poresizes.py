@@ -45,32 +45,49 @@ plot_config={
     "savefig.transparent": True,
 }
 
-Deff_exact = 0.000005321864708362311
 plt.rcParams.update(plot_config)
-fig,ax = plt.subplots(figsize=(4,3))
+fig,ax = plt.subplots(figsize=(4,3), dpi=600)
 
-ratio = 0.03
+num_pore = 3000
+
+specimens = ["O1_50", "O2_40", "O4_40"]
+
+
+with (Path.cwd() / f"data/data.json").open("r") as fp:
+    data = json.load(fp)
+
+ratio_throat_pores = {
+    specimens[0]: 0.1,
+    specimens[1]: 0.007,
+    specimens[2]: 0.52
+}
 
 # process data
 inputDir = Path("/home/willi/Nextcloud/HTWK/share/selectrolyte")
-with (inputDir / "err_over_ratio.json").open("r") as fp:
-    data = json.load(fp)
+with (inputDir / "study_poresize.json").open("r") as fp:
+    study = json.load(fp)
 
-xs = []
-ys = []
-for num_pore, ratios in data.items():
-    if len(ratios) == 0:
-        continue
-    if int(num_pore) < 1000:
-        continue    
-    xs.append(int(num_pore))
-    print(num_pore)
-    err = np.array(ratios[str(ratio)])
-    rel_err = err / Deff_exact * 100 
-    ys.append(rel_err)
+#for specimen in specimens:
+specimen_id = 2
+specimen = specimens[specimen_id]
+if True:
+    Deff_exact = data[specimen]["conductivity"]
+    ratio = ratio_throat_pores[specimen]
+    xs = []
+    ys = []
+    values = study[specimen]
+    for num_pore, ratios in values.items():
+        if len(ratios) == 0:
+            continue
+        #if int(num_pore) < 1000:
+        #    continue    
+        xs.append(int(num_pore))
+        print(num_pore)
+        err = np.array(ratios[str(ratio)])
+        rel_err = err / Deff_exact * 100 
+        ys.append(rel_err)
 
-
-ax.boxplot(x=ys, positions=xs, widths=100)
+    ax.boxplot(x=ys, positions=xs, widths=100, medianprops=dict(color=list(plt.rcParams['axes.prop_cycle'])[specimen_id]["color"], alpha=0.7),)
 
 ax.set_xlabel(r"$n_p \; \left[ \; \right]$")
 ax.set_ylabel(r"$rel. err \; \left[ \% \right]$")
@@ -79,8 +96,8 @@ ax.legend(loc='lower right',
           fancybox=False, frameon=True)
 """
 
-fig.tight_layout(pad=0)
+fig.tight_layout(pad=0.1)
 
 outputDir = Path().cwd() / "results"
-plt.savefig(inputDir / (f"study_err_over_poresizes_{ratio}" + '.pdf'))
+plt.savefig(inputDir / (f"study_poresizes_{specimen}.png"))
 # plt.show()
