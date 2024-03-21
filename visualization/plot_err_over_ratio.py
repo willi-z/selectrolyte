@@ -4,6 +4,7 @@ from matplotlib.ticker import AutoMinorLocator
 import numpy as np
 from pathlib import Path
 import json
+import math
 
 #"""
 matplotlib.rcParams.update({
@@ -45,45 +46,52 @@ plot_config={
     "savefig.transparent": True,
 }
 
-Deff_exact = 0.000005321864708362311
 plt.rcParams.update(plot_config)
 fig,ax = plt.subplots(figsize=(4,3))
 
 num_pore = 3000
 
+specimens = ["O1_50", "O2_40", "O4_40"]
+
+
+with (Path.cwd() / f"data/data.json").open("r") as fp:
+    data = json.load(fp)
+
+
 inputDir = Path("/home/willi/Nextcloud/HTWK/share/selectrolyte/")
 outputDir = inputDir
 # process data
 # Path.cwd() / "data/studies/err_over_ratio.json"
-with (inputDir / "err_over_ratio.json").open("r") as fp:
-    data = json.load(fp)
+with (inputDir / "study_ratio.json").open("r") as fp:
+    study = json.load(fp)
 
-xs = []
-ys = []
+for specimen in specimens:
+    Deff_exact = data[specimen]["conductivity"]
+    xs = []
+    ys = []
+    min_distance = math.inf
+    ratio_min_distance = -1
 
-ratios = data[str(num_pore)]
-for ratio, err in ratios.items():
-    print(float(ratio))
-    xs.append(float(ratio))
-    err = np.array(err)
-    rel_err = err / Deff_exact * 100 
-    ys.append(np.mean(rel_err))
-    # ys.append(rel_err[0])
-
-print(len(xs), len(ys))
-
-# ax.boxplot(x=ys, positions=xs, widths=0.01)
-ax.plot(xs, ys)
-
+    ratios = study[specimen][str(num_pore)]
+    for ratio, err in ratios.items():
+        print(float(ratio))
+        xs.append(float(ratio))
+        err = np.array(err)
+        rel_err = err / Deff_exact * 100 
+        ys.append(np.mean(rel_err))
+        # ys.append(rel_err[0])
+        if abs(ys[-1]) < min_distance:
+            min_distance = abs(ys[-1])
+            ratio_min_distance = xs[-1]
+    print(specimen, ":", ratio_min_distance)
+    ax.plot(xs, ys, label=specimen)
+# ax.set_xscale('log')
 ax.set_xlabel(r"$r \; \left[ \; \right]$")
 ax.set_ylabel(r"$rel. err \; \left[ \% \right]$")
-"""
+#"""
 ax.legend(loc='lower right', 
           fancybox=False, frameon=True)
-"""
 
-fig.tight_layout(pad=0)
+fig.tight_layout(pad=0.1)
 
-#outputDir = Path().cwd() / "results"
-plt.savefig(outputDir / (f"study_err_over_ratio_{num_pore}" + '.pdf'))
-# plt.show()
+plt.savefig(outputDir / "study_ratio.png")

@@ -1,5 +1,5 @@
 from pathlib import Path
-import json
+import csv
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -45,32 +45,36 @@ plot_config={
     "savefig.transparent": True,
 }
 
-specimen = "O1_50_3000_0.1"
+specimens = ["O1_50", "O2_40", "O4_40"]
+specimen = specimens[0]
+distrib_file = './data/poresizes/comulative_pore_volume/' + specimen + '.csv'
+pore_no = 3000
 
-with (Path.cwd() / "data/networks" / (specimen + ".json")).open("r") as fp:
-    content = json.load(fp)
+xs = []
+ys = []
 
-conf = NetworkConfig(**content)
-model = model_from_network(conf, BC_Scale=1.0)
-net = model.network
+with open(distrib_file, 'r') as csvfile:
+    reader = csv.reader(csvfile,quoting=csv.QUOTE_MINIMAL)
+    _header = reader.__next__()
+    # print(header)
+    for data in reader:
+        xs.append(np.float64(data[0]))
+        ys.append(np.float64(data[1]))
+        # ys.append(np.float64(data[0]))
 
-plt.clf()
-plt.cla()
+    ys = np.array(ys, dtype=np.float64) - ys[0]
+    ys = ys / ys[-1] # normalized
+    xs = np.array(xs, dtype=np.float64) * 1e-1 # * 1e-10 # A to m
+
+
+seeds = np.random.rand(pore_no)
+Dpores = np.interp(seeds, ys, xs)
+
+
 fig, ax = plt.subplots(figsize=(4,3))
 plt.rcParams.update(plot_config)
-ax.hist(net['pore.diameter']* 1e9, bins=25, edgecolor='k')
+ax.hist(Dpores, bins=25, edgecolor='k')
 ax.set_xlabel(r"$D_p \; \left[ nm \right]$")
 ax.set_ylabel(r"$n_p \; \left[ \; \right]$")
 fig.tight_layout(pad=0.1)
-plt.savefig("./data/graphics/" + specimen + '_pore.png')
-plt.clf()
-plt.cla()
-
-
-fig, ax = plt.subplots(figsize=(4,3))
-plt.rcParams.update(plot_config)
-ax.hist(net['throat.diameter'] * 1e9, bins=25, edgecolor='k')
-ax.set_xlabel(r"$D_t \; \left[ nm \right]$")
-ax.set_ylabel(r"$n_t \; \left[ \; \right]$")
-fig.tight_layout(pad=0.1)
-plt.savefig("./data/graphics/" + specimen + '_throat.png')
+plt.savefig("./data/graphics/" + f"{specimen}_{pore_no}" + '_pore_exp.png')

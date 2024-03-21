@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 
 
 specimens = ["O1_50", "O2_40", "O4_40"]
-specimen = specimens[0]
-distrib_file = './data/poresizes/comulative_pore_volume/' + specimen + '.csv'
 
 plot_config={
     "figure.dpi": 300,
@@ -41,28 +39,30 @@ plot_config={
     "savefig.transparent": True,
 }
 
-
-xs = []
-ys = []
-
-with open(distrib_file, 'r') as csvfile:
-    reader = csv.reader(csvfile,quoting=csv.QUOTE_MINIMAL)
-    _header = reader.__next__()
-    # print(header)
-    for data in reader:
-        xs.append(np.float64(data[0]))
-        ys.append(np.float64(data[1]))
-
-ys = np.array(ys, dtype=np.float64) - ys[0]
-ys = ys / ys[-1] # normalized
-xs = np.array(xs, dtype=np.float64) * 1e-1 # * 1e-10 # A to m
-
-
 fig,ax = plt.subplots(figsize=(4,3))
+
 plt.rcParams.update(plot_config)
-ax.plot(ys, xs)
-ax.set_ylabel(r"$D_p \; \left[ nm \right]$")
-ax.set_xlabel(r"$p \; \left[ \; \right]$")
+
+for specimen in specimens:
+    xs = []
+    ys = []
+    distrib_file = './data/poresizes/dv_dlog/' + specimen + '.csv'
+    with open(distrib_file, 'r') as csvfile:
+        reader = csv.reader(csvfile,quoting=csv.QUOTE_MINIMAL)
+        _header = reader.__next__()
+        # print(header)
+        for data in reader:
+            xs.append(np.float64(data[0]))
+            ys.append(np.float64(data[1]))
+
+    ys = np.array(ys, dtype=np.float64)
+    xs = np.array(xs, dtype=np.float64)
+    ax.plot(xs, ys, label=specimen)
+
+ax.set_xscale('log')
+ax.set_xlabel(r"$w \; \left[ nm \right]$")
+ax.set_ylabel(r"$dV/dlog(w) \; \left[ cm^3/g \right]$")
+ax.legend(loc="upper right")
 fig.tight_layout(pad=0.1)
 
-plt.savefig(f"./data/graphics/pore_distribution_" + specimen + '.png')
+plt.savefig('./data/graphics/gas_absorption.png')

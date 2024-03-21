@@ -12,9 +12,8 @@ from networks.helpers import model_from_network
 
 specimens = ["O1_50", "O2_40", "O4_40"]
 specimen = specimens[0]
-porosity_str = '0.50'
 num_pore_str = '3000'
-ratio_str = '0.07'
+ratio_str = '0.1'
 
 
 # pc.plot(cmap='Reds')
@@ -41,9 +40,9 @@ pl = pyvista.Plotter(window_size=(1200,1200))
 # pl.view_isometric()
 # pl.camera.zoom(0.25)
 pl.add_mesh(boundary, color="k",line_width=2)
-show_only_boundary = True
+show_only_boundary = False
 
-with (Path.cwd() / f"data/networks/{specimen}_{num_pore_str}_{porosity_str}_{ratio_str}.json").open("r") as fp:
+with (Path.cwd() / f"data/networks/{specimen}_{num_pore_str}_{ratio_str}.json").open("r") as fp:
     content = json.load(fp)
 
 conf = NetworkConfig(**content)
