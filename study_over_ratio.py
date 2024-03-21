@@ -52,7 +52,7 @@ def study(specimen, num_pore, ratio):
                 porosity,
                 ratio,
                 RandomPoreGenerator(),
-                NearestConnsGenerator()
+                NearestConnsGenerator(num_neighbours=3)
             )
             model = model_from_network(conf)
             net = model.network
